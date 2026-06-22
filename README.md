@@ -152,9 +152,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 USER agent
 ```
 
-Alternatively, override the entrypoint at runtime to run setup commands before the agent starts.
+Alternatively, you can override the entrypoint at runtime to install packages or run setup commands dynamically before the agent starts.
 
-**docker run:**
+⚠️ **Important:** When overriding the entrypoint, you must end your execution chain with `exec ./start.sh`.
+
+**Via Docker Run:**
 
 ```bash
 docker run -d \
@@ -166,18 +168,23 @@ docker run -d \
   -e DO_AGENT_NAME="DOA-Agent" \
   --entrypoint /bin/bash \
   karfee111/do-agent:trixie-latest \
-  -c "apt-get update && apt-get install -y --no-install-recommends python3 && ./start.sh"
+  -c "apt-get update && apt-get install -y --no-install-recommends python3 && ln -sf /usr/bin/python3 /usr/bin/python && exec ./start.sh"
 ```
 
-**Docker Compose:**
+**Via Docker Compose:**
 
 ```yaml
 services:
   azure-agent:
     image: karfee111/do-agent:trixie-latest
     restart: unless-stopped
-    entrypoint: ["/bin/bash", "-c"]
-    command: "apt-get update && apt-get install -y --no-install-recommends python3 && ./start.sh"
+    entrypoint: >
+      /bin/bash -c "
+      apt-get update && 
+      apt-get install -y --no-install-recommends python3 && 
+      ln -sf /usr/bin/python3 /usr/bin/python && 
+      exec ./start.sh
+      "
     environment:
       - DO_URL=https://dev.azure.com/your-organization
       - DO_PAT=your_personal_access_token
@@ -185,7 +192,7 @@ services:
       - DO_AGENT_NAME=DOA-Agent
 ```
 
-> **Tip:** For production use, prefer extending via Dockerfile rather than runtime installation — it keeps startup fast and the environment reproducible.
+> **Tip:** For production use, prefer extending via Dockerfile rather than runtime installation — it keeps startup fast, independent of external package mirrors, and fully reproducible.
 
 ---
 
