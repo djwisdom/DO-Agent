@@ -1,10 +1,10 @@
 FROM debian:trixie-slim
 
 LABEL Name="do-agent"
-LABEL Version="4.274.1.2"
+LABEL Version="4.274.1.3"
 
 LABEL org.opencontainers.image.title="do-agent"
-LABEL org.opencontainers.image.version="trixie-4.274.1.2"
+LABEL org.opencontainers.image.version="trixie-4.274.1.3"
 LABEL org.opencontainers.doa.version="linux-amd64-4.274.1"
 
 # Prevent interactive prompts during package installation (e.g., timezone selection)
@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends --no-install-su
     git \
     libicu76 \
     libcurl4t64 \
+    procps \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 

@@ -203,7 +203,7 @@ trixie-{agent_version}.{build_number}       # Debian Trixie
 noble-{agent_version}.{build_number}        # Ubuntu 24.04 LTS
 ```
 
-Examples: `trixie-4.274.1.2`, `noble-4.274.1.1`
+Examples: `trixie-4.274.1.1`, `noble-4.274.1.1`
 
 ### `latest` Tags
 
@@ -211,5 +211,6 @@ Examples: `trixie-4.274.1.2`, `noble-4.274.1.1`
 | :--- | :--- |
 | `trixie-latest` | most recent `trixie-*` build |
 | `noble-latest` | most recent `noble-*` build |
+| `latest` | global alias pointing to the most recent `noble-*` build |
 
-Floating tags always resolve to the most recent build for their respective distribution.
+Floating tags always resolve to the most recent build for their respective distribution or the global default.

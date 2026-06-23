@@ -2,9 +2,16 @@
 # Exit immediately if any command returns a non-zero exit status
 set -e
 
+# Validation: Ensure the agent is already running avoiding starting again the installation
+if [ -f "$PWD/.agent" ]; then
+  echo "Agent already configured, starting"
+
+  exec ./run.sh "$@"
+fi
+
 # Validation: Ensure that the organization URL for the agent has been configured
 if [ -z "$DO_URL" ] || [ "$DO_URL" == "null" ]; then
-  echo 1>&2 "error: organization url empty or not configured"
+  echo "error: organization url empty or not configured" >&2
   
   exit 1
 fi
@@ -12,7 +19,7 @@ fi
 # Validation: Ensure the Personal Access Token (PAT) is provided
 if [ -z "$DO_PAT_FILE" ]; then
   if [ -z "$DO_PAT" ]; then
-    echo 1>&2 "error: missing DO_PAT environment variable"
+    echo "error: missing DO_PAT environment variable" >&2
     
     exit 1
   fi
@@ -32,7 +39,7 @@ export AGENT_ALLOW_RUNASROOT="1"
 DOA_DOWNLOAD_URL='https://download.agent.dev.azure.com/agent/4.274.1/vsts-agent-linux-x64-4.274.1.tar.gz'
 
 if [ -z "$DOA_DOWNLOAD_URL" ] || [ "$DOA_DOWNLOAD_URL" == "null" ]; then
-  echo 1>&2 "error: agent download url empty or not configured"
+  echo "error: agent download url empty or not configured" >&2
   
   exit 1
 fi
@@ -56,4 +63,4 @@ echo -e "\n2. Registering and configuring the agent against Azure DevOps...\n"
 
 echo -e "\n3. Agent successfully configured. Launching worker listener...\n"
 # Switch execution to the listener loop (keeps the container alive and waiting for pipeline jobs)
-./run.sh "$@" # Questo aggiunge la possibilità di ereditare i parametri dalla shell, se scrivo "--once" quando do il run, lo passa allo script "run.sh" all'interno del container
+exec ./run.sh "$@" # Questo aggiunge la possibilità di ereditare i parametri dalla shell, se scrivo "--once" quando do il run, lo passa allo script "run.sh" all'interno del container
