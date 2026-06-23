@@ -1,4 +1,4 @@
-[![Build and Push Docker Images on DockerHub](https://github.com/Blasteed/DO-Agent/actions/workflows/docker-build-and-publish.yaml/badge.svg)](https://github.com/Blasteed/DO-Agent/actions/workflows/docker-build-and-publish.yaml)
+[![Build and Push on DockerHub](https://github.com/Blasteed/DO-Agent/actions/workflows/docker-build-and-publish.yaml/badge.svg)](https://github.com/Blasteed/DO-Agent/actions/workflows/docker-build-and-publish.yaml)
 
 # Azure DevOps Agent
 
