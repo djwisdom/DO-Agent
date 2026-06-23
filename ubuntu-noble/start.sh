@@ -6,6 +6,9 @@ set -e
 if [ -f "$PWD/.agent" ]; then
   echo "Agent already configured, starting"
 
+  export AGENT_ALLOW_RUNASROOT="1"
+  source ./env.sh
+
   exec ./run.sh "$@"
 fi
 
