@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup workspace directories
@@ -67,8 +67,16 @@ jobs:
             --arg trixie "$TRIXIE_COUNT" \
             '{noble_cves: $noble, trixie_cves: $trixie}' > .github/workflows/security-metadata.json
 
-      - name: Commit and Push Reports and Metadata
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Update security reports and metadata"
-          file_pattern: 'security-reports/*.json .github/workflows/security-metadata.json'
+      - name: Git Push Reports and Metadata
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          git add security-reports/*.txt .github/workflows/security-metadata.json
+          
+          if ! git diff --cached --quiet; then
+            git commit -m "Update security reports and metadata"
+            git push origin main
+          else
+            echo "No commit to push."
+          fi
