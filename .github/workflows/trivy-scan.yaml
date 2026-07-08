@@ -11,38 +11,56 @@ permissions:
   contents: write
 
 jobs:
-  security-scan:
+  trivy-scan:
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create reports directory
-        run: mkdir -p .github/security-reports
+      - name: Setup workspace directories
+        run: |
+          mkdir -p security-reports
 
       - name: Scan Ubuntu Noble Image
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: 'docker.io/karfee111/do-agent:noble-latest'
           format: 'json'
-          output: '.github/security-reports/noble-vulnerabilities.json'
+          output: 'noble-temp.json'
           severity: 'HIGH,CRITICAL'
 
+      - name: Convert Noble JSON to Table TXT
+        run: |
+          uses/aquasecurity/trivy-action/trivy convert --format table --output security-reports/noble-vulns.txt noble-temp.json
+
       - name: Scan Debian Trixie Image
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: 'docker.io/karfee111/do-agent:trixie-latest'
           format: 'json'
-          output: '.github/security-reports/trixie-vulnerabilities.json'
+          output: 'trixie-temp.json'
           severity: 'HIGH,CRITICAL'
 
-      - name: Commit and Push JSON Reports
+      - name: Convert Trixie JSON to Table TXT
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add .github/security-reports
-          git commit -m "Update security scan reports" || echo "No changes to commit"
-          git push origin main
+          uses/aquasecurity/trivy-action/trivy convert --format table --output security-reports/trixie-vulns.txt trixie-temp.json
+
+      - name: Generate Security Metadata JSON
+        run: |
+          NOBLE_COUNT=$(jq '[.Results[].Vulnerabilities // [] | length] | add' noble-temp.json || echo 0)
+          TRIXIE_COUNT=$(jq '[.Results[].Vulnerabilities // [] | length] | add' trixie-temp.json || echo 0)
+
+          [ -z "$NOBLE_COUNT" ] || [ "$NOBLE_COUNT" = "null" ] && NOBLE_COUNT=0
+          [ -z "$TRIXIE_COUNT" ] || [ "$TRIXIE_COUNT" = "null" ] && TRIXIE_COUNT=0
+
+          jq -n \
+            --arg noble "$NOBLE_COUNT" \
+            --arg trixie "$TRIXIE_COUNT" \
+            '{noble_cves: $noble, trixie_cves: $trixie}' > .github/workflows/security-metadata.json
+
+      - name: Commit and Push Reports and Metadata
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update security reports and metadata"
+          file_pattern: 'security-reports/*.json .github/workflows/security-metadata.json'
