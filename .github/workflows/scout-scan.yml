@@ -32,7 +32,7 @@ jobs:
         with:
           command: cves
           image: docker.io/karfee111/do-agent:noble-latest
-          sarif: 'scout-noble-results.sarif'
+          sarif-file: 'scout-noble-results.sarif'
           only-severities: 'high,critical'
 
       - name: Scan Debian Trixie Image
@@ -40,7 +40,7 @@ jobs:
         with:
           command: cves
           image: docker.io/karfee111/do-agent:trixie-latest
-          sarif: 'scout-trixie-results.sarif'
+          sarif-file: 'scout-trixie-results.sarif'
           only-severities: 'high,critical'
 
       - name: Upload Noble results to GitHub
