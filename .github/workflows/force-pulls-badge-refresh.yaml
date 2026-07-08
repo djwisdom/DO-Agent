@@ -1,0 +1,42 @@
+name: Force Pulls Badge Refresh
+
+on:
+  workflow_dispatch:
+  schedule:
+  - cron: "0 6 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  force-badge-refresh:
+    runs-on: ubuntu-latest
+
+    steps:
+        - name: Checkout repository
+          uses: actions/checkout@v4
+
+        - name: Update README.md Badge Cache Buster
+          run: |
+            res=$(grep -noP 'cacheBuster=\K[0-9]+' README.md)
+
+            if [ $? -eq 0 ]; then
+                sed -i "s/cacheBuster=[0-9]*/cacheBuster=$(date +%s)/g" README.md
+            else
+                echo "No line to replace!"
+                exit 1
+            fi
+
+        - name: Git Push Updates
+          run: |
+            git config --local user.email "github-actions[bot]@users.noreply.github.com"
+            git config --local user.name "github-actions[bot]"
+
+            git add README.md
+            
+            if ! git diff --cached --quiet; then
+              git commit -m "Forced badge refresh"
+              git push origin main
+            else
+              echo "No commit to push."
+            fi
