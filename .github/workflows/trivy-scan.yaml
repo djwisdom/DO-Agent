@@ -22,7 +22,7 @@ jobs:
         run: |
           mkdir -p security-reports
 
-      - name: Scan Ubuntu Noble Image
+      - name: Scan Ubuntu Noble Image (Temp JSON)
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: 'docker.io/karfee111/do-agent:noble-latest'
@@ -30,11 +30,15 @@ jobs:
           output: 'noble-temp.json'
           severity: 'HIGH,CRITICAL'
 
-      - name: Convert Noble JSON to Table TXT
-        run: |
-          uses/aquasecurity/trivy-action/trivy convert --format table --output security-reports/noble-vulns.txt noble-temp.json
+      - name: Scan Ubuntu Noble Image (Table TXT)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: 'docker.io/karfee111/do-agent:noble-latest'
+          format: 'table'
+          output: 'security-reports/noble-vulns.txt'
+          severity: 'HIGH,CRITICAL'
 
-      - name: Scan Debian Trixie Image
+      - name: Scan Debian Trixie Image (Temp JSON)
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: 'docker.io/karfee111/do-agent:trixie-latest'
@@ -42,9 +46,13 @@ jobs:
           output: 'trixie-temp.json'
           severity: 'HIGH,CRITICAL'
 
-      - name: Convert Trixie JSON to Table TXT
-        run: |
-          uses/aquasecurity/trivy-action/trivy convert --format table --output security-reports/trixie-vulns.txt trixie-temp.json
+      - name: Scan Debian Trixie Image (Table TXT)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: 'docker.io/karfee111/do-agent:trixie-latest'
+          format: 'table'
+          output: 'security-reports/trixie-vulns.txt'
+          severity: 'HIGH,CRITICAL'
 
       - name: Generate Security Metadata JSON
         run: |
