@@ -1,11 +1,11 @@
 FROM ubuntu:noble
 
 LABEL Name="do-agent"
-LABEL Version="4.274.1.3"
+LABEL Version="5.275.0.1"
 
 LABEL org.opencontainers.image.title="do-agent"
-LABEL org.opencontainers.image.version="noble-4.274.1.3"
-LABEL org.opencontainers.doa.version="linux-amd64-4.274.1"
+LABEL org.opencontainers.image.version="noble-5.275.0.1"
+LABEL org.opencontainers.doa.version="linux-x64-5.275.0"
 
 # Update repository lists and install native dependencies required by the agent and Git
 RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests \
@@ -17,16 +17,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends --no-install-su
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Set the working directory inside the container
 WORKDIR /DOA
 
-# Copy the runtime bootstrap script from the host to the container
 COPY start.sh .
 
-# Grant execution permissions to the script
 RUN chmod +x start.sh
 
-# Define the script as the main entry point when the container boots up
 ENTRYPOINT ["./start.sh"]
 
 # Empty CMD instruction to silence the linter
